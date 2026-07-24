@@ -54,7 +54,7 @@ Design a ${data.duration}-second ${data.style} video, aspect ratio ${data.aspect
         kind: "video",
         title: plan.title,
         prompt: data.prompt,
-        payload: { ...plan, duration: data.duration, aspectRatio: data.aspectRatio } as unknown as Record<string, unknown>,
+        payload: JSON.parse(JSON.stringify({ ...plan, duration: data.duration, aspectRatio: data.aspectRatio })),
         subject_id: data.subjectId ?? null,
         thread_id: data.threadId ?? null,
         status: "plan_ready",

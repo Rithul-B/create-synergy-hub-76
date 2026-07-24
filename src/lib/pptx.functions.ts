@@ -58,7 +58,7 @@ Rules: Include a title slide and a conclusion slide. 3-6 concise bullets per sli
         kind: "powerpoint",
         title: deck.title,
         prompt: data.prompt,
-        payload: deck as unknown as Record<string, unknown>,
+        payload: JSON.parse(JSON.stringify(deck)),
         subject_id: data.subjectId ?? null,
         thread_id: data.threadId ?? null,
       })
