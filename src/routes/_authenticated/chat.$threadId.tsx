@@ -10,7 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { sendChatMessage } from "@/lib/chat.functions";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
-import { Plus, Send, Trash2, Pencil, Presentation, AudioLines, Video } from "lucide-react";
+import { Plus, Send, Trash2, Pencil, Presentation, AudioLines, Video, Paperclip, ImageIcon, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/chat/$threadId")({
   head: () => ({ meta: [{ title: "Chat — LearnLab" }] }),
@@ -23,8 +23,28 @@ function ChatView() {
   const qc = useQueryClient();
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
+  const [imageMode, setImageMode] = useState(false);
   const sendFn = useServerFn(sendChatMessage);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function onPickFiles(files: FileList | null) {
+    if (!files) return;
+    const next: string[] = [];
+    for (const f of Array.from(files).slice(0, 4 - images.length)) {
+      if (!f.type.startsWith("image/")) continue;
+      if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name} exceeds 5MB`); continue; }
+      const dataUrl: string = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result as string);
+        r.onerror = rej;
+        r.readAsDataURL(f);
+      });
+      next.push(dataUrl);
+    }
+    setImages((prev) => [...prev, ...next].slice(0, 4));
+  }
 
   const threads = useQuery({
     queryKey: ["threads"],
@@ -81,16 +101,20 @@ function ChatView() {
 
   async function send() {
     const content = input.trim();
-    if (!content || sending) return;
+    if ((!content && images.length === 0) || sending) return;
+    if (imageMode && !content) { toast.error("Describe the image to generate"); return; }
+    const attached = images;
+    const mode = imageMode ? "image" as const : "chat" as const;
     setInput("");
+    setImages([]);
     setSending(true);
-    // Optimistic
+    const optimistic = attached.map((u) => `![attached image](${u})`).join("\n\n") + (attached.length && content ? "\n\n" : "") + content;
     qc.setQueryData<Array<{ id: string; role: string; content: string; created_at: string }>>(["messages", threadId], (old) => [
       ...(old ?? []),
-      { id: "tmp-" + Date.now(), role: "user", content, created_at: new Date().toISOString() },
+      { id: "tmp-" + Date.now(), role: "user", content: optimistic, created_at: new Date().toISOString() },
     ]);
     try {
-      await sendFn({ data: { threadId, content } });
+      await sendFn({ data: { threadId, content, images: attached, mode } });
       await qc.invalidateQueries({ queryKey: ["messages", threadId] });
       await qc.invalidateQueries({ queryKey: ["threads"] });
     } catch (err) {
@@ -148,27 +172,81 @@ function ChatView() {
           {messages.data?.map((m) => (
             <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <Card className={`p-4 max-w-[85%] ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-card"}`}>
-                {m.role === "assistant" ? (
-                  <div className="markdown"><ReactMarkdown>{m.content}</ReactMarkdown></div>
-                ) : (
-                  <div className="whitespace-pre-wrap">{m.content}</div>
-                )}
+                <div className="markdown">
+                  <ReactMarkdown
+                    components={{
+                      img: ({ src, alt }) => (
+                        <img src={src as string} alt={alt ?? ""} className="rounded-md max-w-full my-2 border" />
+                      ),
+                    }}
+                  >
+                    {m.content}
+                  </ReactMarkdown>
+                </div>
               </Card>
             </div>
           ))}
-          {sending && <div className="text-sm text-muted-foreground">Thinking…</div>}
+          {sending && <div className="text-sm text-muted-foreground">{imageMode ? "Generating image…" : "Thinking…"}</div>}
         </div>
         <div className="border-t p-3 md:p-4">
-          <div className="max-w-3xl mx-auto flex gap-2 items-end">
-            <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-              placeholder="Ask anything…"
-              rows={1}
-              className="resize-none min-h-[44px]"
-            />
-            <Button onClick={send} disabled={sending || !input.trim()}><Send className="h-4 w-4" /></Button>
+          <div className="max-w-3xl mx-auto space-y-2">
+            {images.length > 0 && (
+              <div className="flex gap-2 flex-wrap">
+                {images.map((src, i) => (
+                  <div key={i} className="relative">
+                    <img src={src} alt="" className="h-16 w-16 object-cover rounded border" />
+                    <button
+                      onClick={() => setImages((p) => p.filter((_, idx) => idx !== i))}
+                      className="absolute -top-1 -right-1 bg-background border rounded-full p-0.5"
+                      aria-label="Remove image"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2 items-end">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => { onPickFiles(e.target.files); if (fileRef.current) fileRef.current.value = ""; }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => fileRef.current?.click()}
+                disabled={sending || imageMode || images.length >= 4}
+                title="Attach images to analyze"
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant={imageMode ? "default" : "outline"}
+                size="icon"
+                onClick={() => { setImageMode((v) => !v); if (!imageMode) setImages([]); }}
+                disabled={sending}
+                title="Toggle image generation mode"
+              >
+                <ImageIcon className="h-4 w-4" />
+              </Button>
+              <Textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+                placeholder={imageMode ? "Describe an image to generate…" : images.length ? "Ask about the attached image(s)…" : "Ask anything…"}
+                rows={1}
+                className="resize-none min-h-[44px]"
+              />
+              <Button onClick={send} disabled={sending || (!input.trim() && images.length === 0)}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
