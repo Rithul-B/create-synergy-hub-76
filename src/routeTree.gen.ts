@@ -13,9 +13,12 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedVideoRouteImport } from './routes/_authenticated/video'
 import { Route as AuthenticatedSubjectsRouteImport } from './routes/_authenticated/subjects'
+import { Route as AuthenticatedPowerpointRouteImport } from './routes/_authenticated/powerpoint'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
+import { Route as AuthenticatedAudioRouteImport } from './routes/_authenticated/audio'
 import { Route as AuthenticatedSubjectsIndexRouteImport } from './routes/_authenticated/subjects.index'
 import { Route as AuthenticatedChatIndexRouteImport } from './routes/_authenticated/chat.index'
 import { Route as AuthenticatedSubjectsSubjectIdRouteImport } from './routes/_authenticated/subjects.$subjectId'
@@ -40,9 +43,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedVideoRoute = AuthenticatedVideoRouteImport.update({
+  id: '/video',
+  path: '/video',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSubjectsRoute = AuthenticatedSubjectsRouteImport.update({
   id: '/subjects',
   path: '/subjects',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPowerpointRoute = AuthenticatedPowerpointRouteImport.update({
+  id: '/powerpoint',
+  path: '/powerpoint',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -53,6 +66,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
 const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
   id: '/chat',
   path: '/chat',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAudioRoute = AuthenticatedAudioRouteImport.update({
+  id: '/audio',
+  path: '/audio',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSubjectsIndexRoute =
@@ -83,9 +101,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/audio': typeof AuthenticatedAudioRoute
   '/chat': typeof AuthenticatedChatRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/powerpoint': typeof AuthenticatedPowerpointRoute
   '/subjects': typeof AuthenticatedSubjectsRouteWithChildren
+  '/video': typeof AuthenticatedVideoRoute
   '/chat/$threadId': typeof AuthenticatedChatThreadIdRoute
   '/subjects/$subjectId': typeof AuthenticatedSubjectsSubjectIdRoute
   '/chat/': typeof AuthenticatedChatIndexRoute
@@ -95,7 +116,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/audio': typeof AuthenticatedAudioRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/powerpoint': typeof AuthenticatedPowerpointRoute
+  '/video': typeof AuthenticatedVideoRoute
   '/chat/$threadId': typeof AuthenticatedChatThreadIdRoute
   '/subjects/$subjectId': typeof AuthenticatedSubjectsSubjectIdRoute
   '/chat': typeof AuthenticatedChatIndexRoute
@@ -107,9 +131,12 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/audio': typeof AuthenticatedAudioRoute
   '/_authenticated/chat': typeof AuthenticatedChatRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/powerpoint': typeof AuthenticatedPowerpointRoute
   '/_authenticated/subjects': typeof AuthenticatedSubjectsRouteWithChildren
+  '/_authenticated/video': typeof AuthenticatedVideoRoute
   '/_authenticated/chat/$threadId': typeof AuthenticatedChatThreadIdRoute
   '/_authenticated/subjects/$subjectId': typeof AuthenticatedSubjectsSubjectIdRoute
   '/_authenticated/chat/': typeof AuthenticatedChatIndexRoute
@@ -121,9 +148,12 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/audio'
     | '/chat'
     | '/dashboard'
+    | '/powerpoint'
     | '/subjects'
+    | '/video'
     | '/chat/$threadId'
     | '/subjects/$subjectId'
     | '/chat/'
@@ -133,7 +163,10 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/audio'
     | '/dashboard'
+    | '/powerpoint'
+    | '/video'
     | '/chat/$threadId'
     | '/subjects/$subjectId'
     | '/chat'
@@ -144,9 +177,12 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
+    | '/_authenticated/audio'
     | '/_authenticated/chat'
     | '/_authenticated/dashboard'
+    | '/_authenticated/powerpoint'
     | '/_authenticated/subjects'
+    | '/_authenticated/video'
     | '/_authenticated/chat/$threadId'
     | '/_authenticated/subjects/$subjectId'
     | '/_authenticated/chat/'
@@ -190,11 +226,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/video': {
+      id: '/_authenticated/video'
+      path: '/video'
+      fullPath: '/video'
+      preLoaderRoute: typeof AuthenticatedVideoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/subjects': {
       id: '/_authenticated/subjects'
       path: '/subjects'
       fullPath: '/subjects'
       preLoaderRoute: typeof AuthenticatedSubjectsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/powerpoint': {
+      id: '/_authenticated/powerpoint'
+      path: '/powerpoint'
+      fullPath: '/powerpoint'
+      preLoaderRoute: typeof AuthenticatedPowerpointRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -209,6 +259,13 @@ declare module '@tanstack/react-router' {
       path: '/chat'
       fullPath: '/chat'
       preLoaderRoute: typeof AuthenticatedChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/audio': {
+      id: '/_authenticated/audio'
+      path: '/audio'
+      fullPath: '/audio'
+      preLoaderRoute: typeof AuthenticatedAudioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/subjects/': {
@@ -271,15 +328,21 @@ const AuthenticatedSubjectsRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAudioRoute: typeof AuthenticatedAudioRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedPowerpointRoute: typeof AuthenticatedPowerpointRoute
   AuthenticatedSubjectsRoute: typeof AuthenticatedSubjectsRouteWithChildren
+  AuthenticatedVideoRoute: typeof AuthenticatedVideoRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAudioRoute: AuthenticatedAudioRoute,
   AuthenticatedChatRoute: AuthenticatedChatRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedPowerpointRoute: AuthenticatedPowerpointRoute,
   AuthenticatedSubjectsRoute: AuthenticatedSubjectsRouteWithChildren,
+  AuthenticatedVideoRoute: AuthenticatedVideoRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
