@@ -10,7 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { sendChatMessage } from "@/lib/chat.functions";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
-import { Plus, Send, Trash2, Pencil, Presentation, AudioLines, Video } from "lucide-react";
+import { Plus, Send, Trash2, Pencil, Presentation, AudioLines, Video, Paperclip, ImageIcon, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/chat/$threadId")({
   head: () => ({ meta: [{ title: "Chat — LearnLab" }] }),
@@ -23,8 +23,28 @@ function ChatView() {
   const qc = useQueryClient();
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
+  const [imageMode, setImageMode] = useState(false);
   const sendFn = useServerFn(sendChatMessage);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function onPickFiles(files: FileList | null) {
+    if (!files) return;
+    const next: string[] = [];
+    for (const f of Array.from(files).slice(0, 4 - images.length)) {
+      if (!f.type.startsWith("image/")) continue;
+      if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name} exceeds 5MB`); continue; }
+      const dataUrl: string = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result as string);
+        r.onerror = rej;
+        r.readAsDataURL(f);
+      });
+      next.push(dataUrl);
+    }
+    setImages((prev) => [...prev, ...next].slice(0, 4));
+  }
 
   const threads = useQuery({
     queryKey: ["threads"],
@@ -81,16 +101,20 @@ function ChatView() {
 
   async function send() {
     const content = input.trim();
-    if (!content || sending) return;
+    if ((!content && images.length === 0) || sending) return;
+    if (imageMode && !content) { toast.error("Describe the image to generate"); return; }
+    const attached = images;
+    const mode = imageMode ? "image" as const : "chat" as const;
     setInput("");
+    setImages([]);
     setSending(true);
-    // Optimistic
+    const optimistic = attached.map((u) => `![attached image](${u})`).join("\n\n") + (attached.length && content ? "\n\n" : "") + content;
     qc.setQueryData<Array<{ id: string; role: string; content: string; created_at: string }>>(["messages", threadId], (old) => [
       ...(old ?? []),
-      { id: "tmp-" + Date.now(), role: "user", content, created_at: new Date().toISOString() },
+      { id: "tmp-" + Date.now(), role: "user", content: optimistic, created_at: new Date().toISOString() },
     ]);
     try {
-      await sendFn({ data: { threadId, content } });
+      await sendFn({ data: { threadId, content, images: attached, mode } });
       await qc.invalidateQueries({ queryKey: ["messages", threadId] });
       await qc.invalidateQueries({ queryKey: ["threads"] });
     } catch (err) {
