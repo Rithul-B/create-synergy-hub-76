@@ -7,7 +7,19 @@ function key() {
   return k;
 }
 
-export async function chatCompletion(messages: Array<{ role: string; content: string }>, opts?: { model?: string; json?: boolean }) {
+export type ChatContent =
+  | string
+  | Array<
+      | { type: "text"; text: string }
+      | { type: "image_url"; image_url: { url: string } }
+    >;
+
+export type ChatMessage = { role: string; content: ChatContent };
+
+export async function chatCompletion(
+  messages: ChatMessage[],
+  opts?: { model?: string; json?: boolean },
+) {
   const res = await fetch(`${BASE}/chat/completions`, {
     method: "POST",
     headers: {
@@ -28,6 +40,31 @@ export async function chatCompletion(messages: Array<{ role: string; content: st
   }
   const data = await res.json();
   return data.choices?.[0]?.message?.content as string;
+}
+
+export async function generateImageDataUrl(prompt: string): Promise<string> {
+  const res = await fetch(`${BASE}/chat/completions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${key()}`,
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash-image",
+      messages: [{ role: "user", content: prompt }],
+      modalities: ["image", "text"],
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    if (res.status === 429) throw new Error("Rate limited. Please try again in a moment.");
+    if (res.status === 402) throw new Error("AI credits exhausted. Please add credits to continue.");
+    throw new Error(`Image generation failed [${res.status}]: ${body}`);
+  }
+  const data = await res.json();
+  const url = data.choices?.[0]?.message?.images?.[0]?.image_url?.url as string | undefined;
+  if (!url) throw new Error("No image returned");
+  return url;
 }
 
 export async function ttsBase64(text: string, voice = "alloy") {

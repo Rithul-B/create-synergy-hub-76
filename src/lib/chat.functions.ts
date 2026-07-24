@@ -4,7 +4,9 @@ import { z } from "zod";
 
 const SendInput = z.object({
   threadId: z.string().uuid(),
-  content: z.string().min(1).max(20000),
+  content: z.string().max(20000),
+  images: z.array(z.string()).max(4).optional(), // data URLs
+  mode: z.enum(["chat", "image"]).optional(),
 });
 
 export const sendChatMessage = createServerFn({ method: "POST" })
@@ -12,8 +14,13 @@ export const sendChatMessage = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => SendInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const images = data.images ?? [];
+    const mode = data.mode ?? "chat";
 
-    // Load thread + subject for context
+    if (!data.content.trim() && images.length === 0) {
+      throw new Error("Message is empty");
+    }
+
     const { data: thread, error: threadErr } = await supabase
       .from("threads")
       .select("id, title, subject_id, subjects(name, description)")
@@ -21,35 +28,70 @@ export const sendChatMessage = createServerFn({ method: "POST" })
       .single();
     if (threadErr || !thread) throw new Error("Thread not found");
 
-    // Insert user message
+    // Save user message. Encode attached images as markdown so the UI renders them.
+    const userStored =
+      images.map((u) => `![attached image](${u})`).join("\n\n") +
+      (images.length && data.content ? "\n\n" : "") +
+      data.content;
+
     const { error: userMsgErr } = await supabase.from("messages").insert({
       thread_id: data.threadId,
       user_id: userId,
       role: "user",
-      content: data.content,
+      content: userStored,
     });
     if (userMsgErr) throw new Error(userMsgErr.message);
 
-    // Load full history
-    const { data: history } = await supabase
-      .from("messages")
-      .select("role, content")
-      .eq("thread_id", data.threadId)
-      .order("created_at", { ascending: true });
-
+    const { chatCompletion, generateImageDataUrl } = await import("./ai.server");
     const subjectName = (thread as { subjects?: { name?: string } }).subjects?.name;
-    const system = subjectName
-      ? `You are an expert AI tutor helping a student in the subject: ${subjectName}. Provide clear, accurate, well-structured explanations. Use markdown formatting.`
-      : `You are a helpful AI assistant. Provide clear, well-structured answers using markdown.`;
 
-    const { chatCompletion } = await import("./ai.server");
-    const messages = [
-      { role: "system", content: system },
-      ...(history ?? []).map((m) => ({ role: m.role, content: m.content })),
-    ];
-    const assistantText = await chatCompletion(messages);
+    let assistantText: string;
 
-    // Save assistant message
+    if (mode === "image") {
+      // Generate an image from the prompt.
+      const prompt = subjectName
+        ? `Educational illustration for a ${subjectName} student: ${data.content}`
+        : data.content;
+      const dataUrl = await generateImageDataUrl(prompt);
+      assistantText = `![generated image](${dataUrl})`;
+    } else {
+      // Text chat with optional image understanding. Load history (text-only for size).
+      const { data: history } = await supabase
+        .from("messages")
+        .select("role, content")
+        .eq("thread_id", data.threadId)
+        .order("created_at", { ascending: true })
+        .limit(40);
+
+      const system = subjectName
+        ? `You are an expert AI tutor helping a student in the subject: ${subjectName}. Provide clear, accurate, well-structured explanations. Use markdown formatting.`
+        : `You are a helpful AI assistant. Provide clear, well-structured answers using markdown.`;
+
+      // Strip data URLs from historical messages to keep prompt small; keep placeholder.
+      const cleaned = (history ?? []).slice(0, -1).map((m) => ({
+        role: m.role,
+        content: m.content.replace(/!\[[^\]]*\]\(data:[^)]+\)/g, "[image]"),
+      }));
+
+      // Build final user message as multimodal if images attached.
+      const finalUser =
+        images.length > 0
+          ? {
+              role: "user",
+              content: [
+                ...images.map((url) => ({ type: "image_url" as const, image_url: { url } })),
+                { type: "text" as const, text: data.content || "Please analyze the attached image(s)." },
+              ],
+            }
+          : { role: "user", content: data.content };
+
+      const model = images.length > 0 ? "google/gemini-2.5-flash" : undefined;
+      assistantText = await chatCompletion(
+        [{ role: "system", content: system }, ...cleaned, finalUser],
+        model ? { model } : undefined,
+      );
+    }
+
     await supabase.from("messages").insert({
       thread_id: data.threadId,
       user_id: userId,
@@ -57,9 +99,9 @@ export const sendChatMessage = createServerFn({ method: "POST" })
       content: assistantText,
     });
 
-    // Auto-title if still default
+    const titleSource = data.content || (mode === "image" ? "Image generation" : "Image analysis");
     if (thread.title === "New chat" || !thread.title) {
-      const title = data.content.slice(0, 60).replace(/\s+/g, " ").trim();
+      const title = titleSource.slice(0, 60).replace(/\s+/g, " ").trim();
       await supabase.from("threads").update({ title, updated_at: new Date().toISOString() }).eq("id", data.threadId);
     } else {
       await supabase.from("threads").update({ updated_at: new Date().toISOString() }).eq("id", data.threadId);
