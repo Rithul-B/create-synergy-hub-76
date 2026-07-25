@@ -72,9 +72,14 @@ export const sendChatMessage = createServerFn({ method: "POST" })
       const guidance = preferenceInstructions(parsePreferences(profile?.preferences));
 
       const base = subjectName
-        ? `You are an expert AI tutor helping a student in the subject: ${subjectName}. Provide clear, accurate, well-structured explanations. Use markdown formatting.`
+        ? `You are a ${subjectName} Tutor AI for a student portal. Your ONLY responsibility is to answer ${subjectName} questions. Before answering, determine whether the question is related to ${subjectName}. If it is not related to ${subjectName}, respond exactly with: 'This AI is dedicated to ${subjectName} only. Please ask a ${subjectName}-related question.' Never answer questions from other subjects. Do not provide explanations, hints, or partial answers for non-${subjectName} questions. Use clear markdown formatting for valid ${subjectName} answers.`
         : `You are a helpful AI assistant. Provide clear, well-structured answers using markdown.`;
-      const system = guidance ? `${base} ${guidance}` : base;
+      // Image-only messages (vision analysis) are always allowed regardless of subject scope.
+      const scopeOverride =
+        subjectName && images.length > 0 && !data.content.trim()
+          ? `You are an expert ${subjectName} tutor. Analyze the attached image(s) in the context of ${subjectName}. If the image is unrelated to ${subjectName}, briefly say so.`
+          : null;
+      const system = guidance ? `${scopeOverride ?? base} ${guidance}` : (scopeOverride ?? base);
 
       // Strip data URLs from historical messages to keep prompt small; keep placeholder.
       const cleaned = (history ?? []).slice(0, -1).map((m) => ({
