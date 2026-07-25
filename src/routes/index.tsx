@@ -89,7 +89,7 @@ function Landing() {
       <header className="max-w-6xl mx-auto flex items-center justify-between p-6 gap-4">
         <div className="flex items-center gap-2 min-w-0">
           <div className="h-9 w-9 shrink-0 rounded-xl bg-primary text-primary-foreground grid place-items-center">
-            <GraduationCap className="h-5 w-5" />
+            <Book className="h-5 w-5" />
           </div>
 
           <span className="font-display text-2xl truncate">{APP_NAME}</span>
