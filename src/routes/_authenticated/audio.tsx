@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { AudioLines, Download, Loader2 } from "lucide-react";
+import { pageTitle } from "@/lib/brand";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
@@ -18,7 +19,7 @@ const search = z.object({ from: z.string().uuid().optional() });
 
 export const Route = createFileRoute("/_authenticated/audio")({
   validateSearch: (s) => search.parse(s),
-  head: () => ({ meta: [{ title: "Audio — LearnLab" }] }),
+  head: () => ({ meta: [{ title: pageTitle("Audio") }] }),
   component: AudioPage,
 });
 

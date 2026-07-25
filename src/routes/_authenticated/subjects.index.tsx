@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { toast } from "sonner";
 import { BookOpen, Plus, Pin, PinOff, Pencil, Trash2, Search } from "lucide-react";
+import { pageTitle } from "@/lib/brand";
 
 export const Route = createFileRoute("/_authenticated/subjects/")({
-  head: () => ({ meta: [{ title: "Subjects — LearnLab" }] }),
+  head: () => ({ meta: [{ title: pageTitle("Subjects") }] }),
   component: SubjectsPage,
 });
 

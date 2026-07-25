@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { parsePreferences, preferenceInstructions } from "@/lib/preferences";
 import { z } from "zod";
 
 const SendInput = z.object({
@@ -63,9 +64,17 @@ export const sendChatMessage = createServerFn({ method: "POST" })
         .order("created_at", { ascending: true })
         .limit(40);
 
-      const system = subjectName
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("preferences")
+        .eq("id", userId)
+        .maybeSingle();
+      const guidance = preferenceInstructions(parsePreferences(profile?.preferences));
+
+      const base = subjectName
         ? `You are an expert AI tutor helping a student in the subject: ${subjectName}. Provide clear, accurate, well-structured explanations. Use markdown formatting.`
         : `You are a helpful AI assistant. Provide clear, well-structured answers using markdown.`;
+      const system = guidance ? `${base} ${guidance}` : base;
 
       // Strip data URLs from historical messages to keep prompt small; keep placeholder.
       const cleaned = (history ?? []).slice(0, -1).map((m) => ({

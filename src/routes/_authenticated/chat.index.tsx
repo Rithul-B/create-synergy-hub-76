@@ -2,9 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { pageTitle } from "@/lib/brand";
 
 export const Route = createFileRoute("/_authenticated/chat/")({
-  head: () => ({ meta: [{ title: "Chat — LearnLab" }] }),
+  head: () => ({ meta: [{ title: pageTitle("AI Tutor") }] }),
   component: ChatIndex,
 });
 

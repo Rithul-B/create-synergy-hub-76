@@ -16,6 +16,8 @@ export type Slide = {
   bullets: string[];
   notes: string;
   imageSuggestion?: string;
+  /** Generated illustration, kept client-side only — never persisted to the database. */
+  imageDataUrl?: string;
 };
 export type Deck = {
   title: string;
@@ -67,4 +69,43 @@ Rules: Include a title slide and a conclusion slide. 3-6 concise bullets per sli
     if (error) throw new Error(error.message);
 
     return { id: saved.id, deck };
+  });
+
+const ImagesInput = z.object({
+  slides: z
+    .array(z.object({ index: z.number().int().min(0), prompt: z.string().min(3).max(600) }))
+    .min(1)
+    .max(20),
+  style: z.string().default("clean modern"),
+});
+
+export type SlideImageResult =
+  | { index: number; dataUrl: string }
+  | { index: number; error: string };
+
+export const generateSlideImages = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ImagesInput.parse(d))
+  .handler(async ({ data }): Promise<{ results: SlideImageResult[] }> => {
+    const { generateImageDataUrl } = await import("./ai.server");
+    const queue = [...data.slides];
+    const results: SlideImageResult[] = [];
+
+    // Two at a time keeps us well under the gateway's rate limit on larger decks.
+    async function worker() {
+      for (let job = queue.shift(); job; job = queue.shift()) {
+        try {
+          const dataUrl = await generateImageDataUrl(
+            `${job.prompt}. Educational illustration in a ${data.style} style. Clean composition, wide 16:9 framing, no text or captions in the image.`,
+          );
+          results.push({ index: job.index, dataUrl });
+        } catch (err) {
+          results.push({ index: job.index, error: err instanceof Error ? err.message : "Image failed" });
+        }
+      }
+    }
+    await Promise.all([worker(), worker()]);
+
+    results.sort((a, b) => a.index - b.index);
+    return { results };
   });
