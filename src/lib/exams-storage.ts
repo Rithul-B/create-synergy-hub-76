@@ -30,7 +30,7 @@ export async function fetchExams(): Promise<{ exams: ExamRecord[]; localOnly: bo
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { exams: [], localOnly: false };
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("exams")
     .select("*")
     .order("exam_date", { ascending: true });
