@@ -77,7 +77,7 @@ export async function savePlannerData(examId: string, planner: ExamPlannerData):
 
   const merged = mergePlannerData(planner);
 
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from("exams")
     .update({ planner_data: merged })
     .eq("id", examId);
