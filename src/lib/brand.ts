@@ -1,5 +1,5 @@
 /** Change this single value to rename the app everywhere. */
-export const APP_NAME = "ExamForge";
+export const APP_NAME = "Study Forge";
 
 export const APP_TAGLINE = "Plan, track, and ace every exam";
 

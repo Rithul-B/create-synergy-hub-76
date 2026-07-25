@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { GraduationCap } from "lucide-react";
+import { Book } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { APP_NAME, pageTitle } from "@/lib/brand";
 

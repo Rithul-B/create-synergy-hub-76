@@ -32,6 +32,7 @@ import { fetchExams } from "@/lib/exams-storage";
 
 import {
   GraduationCap,
+  Book,
   CalendarDays,
   ArrowRight,
   Flame,

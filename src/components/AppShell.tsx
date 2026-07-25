@@ -13,6 +13,7 @@ import {
   Settings,
   LogOut,
   GraduationCap,
+  Book,
   MoreHorizontal,
 } from "lucide-react";
 
