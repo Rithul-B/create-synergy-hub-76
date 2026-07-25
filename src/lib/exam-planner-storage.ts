@@ -31,7 +31,7 @@ export async function fetchPlannerData(examId: string): Promise<ExamPlannerData>
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return DEFAULT_PLANNER_DATA();
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("exams")
     .select("planner_data")
     .eq("id", examId)
@@ -53,7 +53,7 @@ export async function fetchAllPlannerData(): Promise<Record<string, ExamPlannerD
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return {};
 
-  const { data, error } = await supabase.from("exams").select("id, planner_data");
+  const { data, error } = await (supabase as any).from("exams").select("id, planner_data");
   const result: Record<string, ExamPlannerData> = { ...readLocalAll(auth.user.id) };
 
   if (!error && data) {
@@ -77,7 +77,7 @@ export async function savePlannerData(examId: string, planner: ExamPlannerData):
 
   const merged = mergePlannerData(planner);
 
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from("exams")
     .update({ planner_data: merged })
     .eq("id", examId);

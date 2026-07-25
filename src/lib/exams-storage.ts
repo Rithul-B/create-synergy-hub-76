@@ -30,7 +30,7 @@ export async function fetchExams(): Promise<{ exams: ExamRecord[]; localOnly: bo
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { exams: [], localOnly: false };
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("exams")
     .select("*")
     .order("exam_date", { ascending: true });
@@ -72,7 +72,7 @@ export async function createExam(input: ExamInput): Promise<ExamRecord> {
     progress: input.progress ?? 0,
   };
 
-  const { data, error } = await supabase.from("exams").insert(row).select("*").single();
+  const { data, error } = await (supabase as any).from("exams").insert(row).select("*").single();
   if (!error && data) return data as ExamRecord;
 
   if (error && isMissingTableError(error.message)) {
@@ -109,7 +109,7 @@ export async function updateExam(id: string, input: Partial<ExamInput>): Promise
   if (input.location !== undefined) patch.location = input.location?.trim() || null;
   if (input.notes !== undefined) patch.notes = input.notes?.trim() || null;
 
-  const { error } = await supabase.from("exams").update({
+  const { error } = await (supabase as any).from("exams").update({
     ...(patch.title !== undefined ? { title: patch.title } : {}),
     ...(patch.exam_date !== undefined ? { exam_date: patch.exam_date } : {}),
     ...(patch.subject_id !== undefined ? { subject_id: patch.subject_id } : {}),
@@ -142,7 +142,7 @@ export async function deleteExam(id: string): Promise<void> {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) throw new Error("Not signed in");
 
-  const { error } = await supabase.from("exams").delete().eq("id", id);
+  const { error } = await (supabase as any).from("exams").delete().eq("id", id);
   if (!error) return;
 
   if (error && isMissingTableError(error.message)) {
