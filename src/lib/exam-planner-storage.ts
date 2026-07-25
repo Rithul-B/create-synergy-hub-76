@@ -31,7 +31,7 @@ export async function fetchPlannerData(examId: string): Promise<ExamPlannerData>
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return DEFAULT_PLANNER_DATA();
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("exams")
     .select("planner_data")
     .eq("id", examId)
