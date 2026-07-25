@@ -53,7 +53,7 @@ export async function fetchAllPlannerData(): Promise<Record<string, ExamPlannerD
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return {};
 
-  const { data, error } = await supabase.from("exams").select("id, planner_data");
+  const { data, error } = await (supabase as any).from("exams").select("id, planner_data");
   const result: Record<string, ExamPlannerData> = { ...readLocalAll(auth.user.id) };
 
   if (!error && data) {
