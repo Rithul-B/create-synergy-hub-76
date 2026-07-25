@@ -13,6 +13,7 @@ import {
   Settings,
   LogOut,
   GraduationCap,
+  Book,
   MoreHorizontal,
 } from "lucide-react";
 
@@ -82,7 +83,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="p-5 border-b border-sidebar-border">
           <Link to="/dashboard" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground grid place-items-center">
-              <GraduationCap className="h-4 w-4" />
+              <Book className="h-4 w-4" />
             </div>
 
             <span className="font-display text-xl">{APP_NAME}</span>
@@ -127,7 +128,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b bg-background/95 backdrop-blur px-4 py-3 md:px-6">
           <Link to="/dashboard" className="md:hidden flex items-center gap-2 min-w-0">
             <div className="h-8 w-8 shrink-0 rounded-lg bg-primary text-primary-foreground grid place-items-center">
-              <GraduationCap className="h-4 w-4" />
+              <Book className="h-4 w-4" />
             </div>
 
             <span className="font-display text-lg truncate">{APP_NAME}</span>

@@ -32,6 +32,7 @@ import { fetchExams } from "@/lib/exams-storage";
 
 import {
   GraduationCap,
+  Book,
   CalendarDays,
   ArrowRight,
   Flame,
@@ -220,7 +221,7 @@ function Dashboard() {
             <Stat
               label="Total exams"
               value={examStats.total}
-              icon={GraduationCap}
+              icon={Book}
               color="text-violet-600"
             />
 

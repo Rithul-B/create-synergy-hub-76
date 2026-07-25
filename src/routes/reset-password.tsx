@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { GraduationCap } from "lucide-react";
+import { Book } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { APP_NAME, pageTitle } from "@/lib/brand";
 
@@ -44,7 +44,7 @@ function ResetPage() {
         <div className="w-full max-w-md space-y-6">
           <Link to="/" className="flex items-center gap-2 justify-center">
             <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground grid place-items-center">
-              <GraduationCap className="h-5 w-5" />
+              <Book className="h-5 w-5" />
             </div>
             <span className="font-display text-3xl">{APP_NAME}</span>
           </Link>

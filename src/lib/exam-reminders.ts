@@ -60,7 +60,7 @@ export function checkExamReminders(
         ? `${exam.title} is TODAY! Progress: ${exam.progress}%`
         : `${exam.title} — ${countdownLabel(exam.exam_date)}. Progress: ${exam.progress}%`;
 
-    new Notification("ExamForge reminder", {
+    new Notification("Study Forge reminder", {
       body,
       icon: "/favicon.ico",
       tag: notifyKey,
