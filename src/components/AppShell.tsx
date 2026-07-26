@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 
 import { useState, type ReactNode } from "react";
 
@@ -17,9 +17,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 
-import { supabase } from "@/integrations/supabase/client";
-
-import { useQueryClient } from "@tanstack/react-query";
+import { useSignOut } from "@/lib/session";
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
@@ -52,10 +50,6 @@ const MOBILE_PRIMARY = ["/dashboard", "/exams", "/subjects", "/chat"] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
-
-  const navigate = useNavigate();
-
-  const qc = useQueryClient();
 
   const [moreOpen, setMoreOpen] = useState(false);
 

@@ -16,6 +16,7 @@ import { readTheme, saveTheme, type Theme } from "@/lib/theme";
 import { toast } from "sonner";
 import { Settings as SettingsIcon, Loader2, Monitor, Sun, Moon, Sparkles, Bell } from "lucide-react";
 import { pageTitle } from "@/lib/brand";
+import { SessionCard } from "@/components/SessionCard";
 import { testAiConnection } from "@/lib/exam.functions";
 import { requestReminderPermission, reminderPermission } from "@/lib/exam-reminders";
 
@@ -303,6 +304,8 @@ function SettingsPage() {
               </Button>
             </div>
           </Card>
+
+          <SessionCard />
         </>
       )}
     </div>
