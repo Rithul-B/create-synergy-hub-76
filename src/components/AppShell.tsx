@@ -103,7 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
 
         <button
-          onClick={signOut}
+          onClick={() => signOut()}
 
           className="m-3 flex items-center gap-2 rounded-md px-3 py-2 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
         >
