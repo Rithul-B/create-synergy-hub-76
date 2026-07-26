@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 
 import { useState, type ReactNode } from "react";
 
@@ -17,9 +17,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 
-import { supabase } from "@/integrations/supabase/client";
-
-import { useQueryClient } from "@tanstack/react-query";
+import { useSignOut } from "@/lib/session";
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
@@ -53,25 +51,14 @@ const MOBILE_PRIMARY = ["/dashboard", "/exams", "/subjects", "/chat"] as const;
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
 
-  const navigate = useNavigate();
-
-  const qc = useQueryClient();
-
   const [moreOpen, setMoreOpen] = useState(false);
 
   function isActive(to: string) {
     return location.pathname === to || location.pathname.startsWith(to + "/");
   }
 
-  async function signOut() {
-    await qc.cancelQueries();
+  const signOut = useSignOut();
 
-    qc.clear();
-
-    await supabase.auth.signOut();
-
-    navigate({ to: "/auth", replace: true });
-  }
 
   const primary = NAV.filter((item) => (MOBILE_PRIMARY as readonly string[]).includes(item.to));
 
@@ -116,7 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
 
         <button
-          onClick={signOut}
+          onClick={() => signOut()}
 
           className="m-3 flex items-center gap-2 rounded-md px-3 py-2 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
         >

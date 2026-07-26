@@ -21,6 +21,7 @@ import { applyTheme, readTheme } from "../lib/theme";
 import { APP_NAME, APP_TAGLINE, APP_DESCRIPTION } from "../lib/brand";
 
 import { supabase } from "@/integrations/supabase/client";
+import { useSessionKeepAlive } from "@/lib/session";
 
 const DEFAULT_TITLE = `${APP_NAME} — ${APP_TAGLINE}`;
 
@@ -138,6 +139,8 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
+  useSessionKeepAlive();
+
   const { queryClient } = Route.useRouteContext();
 
   const router = useRouter();
