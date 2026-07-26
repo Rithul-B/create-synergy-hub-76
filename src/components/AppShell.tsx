@@ -63,15 +63,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     return location.pathname === to || location.pathname.startsWith(to + "/");
   }
 
-  async function signOut() {
-    await qc.cancelQueries();
+  const signOut = useSignOut();
 
-    qc.clear();
-
-    await supabase.auth.signOut();
-
-    navigate({ to: "/auth", replace: true });
-  }
 
   const primary = NAV.filter((item) => (MOBILE_PRIMARY as readonly string[]).includes(item.to));
 
