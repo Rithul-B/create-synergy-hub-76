@@ -33,9 +33,24 @@ function AuthPage() {
 
   // After Google OAuth, Supabase returns here with tokens in the URL hash.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
-    });
+    let cancelled = false;
+
+    try {
+      supabase.auth
+        .getSession()
+        .then(({ data }) => {
+          if (!cancelled && data.session) navigate({ to: "/dashboard", replace: true });
+        })
+        .catch((error) => {
+          console.error("Study Forge session check failed", error);
+        });
+    } catch (error) {
+      console.error("Study Forge session check could not start", error);
+    }
+
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   async function handleSubmit(e: React.FormEvent) {

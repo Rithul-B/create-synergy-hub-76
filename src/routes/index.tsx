@@ -43,7 +43,26 @@ function Landing() {
   const [authed, setAuthed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setAuthed(!!data.user));
+    let cancelled = false;
+
+    try {
+      supabase.auth
+        .getUser()
+        .then(({ data }) => {
+          if (!cancelled) setAuthed(!!data.user);
+        })
+        .catch((error) => {
+          console.error("Study Forge landing auth check failed", error);
+          if (!cancelled) setAuthed(false);
+        });
+    } catch (error) {
+      console.error("Study Forge landing auth check could not start", error);
+      setAuthed(false);
+    }
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const features = [
