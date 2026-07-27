@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExamProgressBar, PriorityBadge, StatusBadge } from "@/components/exam-badges";
 import { ExamPlannerPanel } from "@/components/ExamPlannerPanel";
-import { TopicSummary } from "@/components/exam-topics";
+import { ExamPlannerSummary } from "@/components/ExamPlannerSummary";
 import { pageTitle } from "@/lib/brand";
 import {
   EXAM_PRIORITIES, EXAM_STATUSES, countdownClass, countdownLabel,
@@ -277,12 +277,6 @@ function ExamsPage() {
         </Dialog>
       </div>
 
-      {examsQuery.data?.localOnly && (
-        <Card className="p-4 border-amber-500/40 bg-amber-500/10 text-sm">
-          Planner data saves on this device until Supabase migrations are applied.
-        </Card>
-      )}
-
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
@@ -343,12 +337,9 @@ function ExamsPage() {
                     <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-4 w-4" />{new Date(exam.exam_date).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</span>
                     {exam.location && <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" />{exam.location}</span>}
                   </div>
-                  {plannerData?.topics.length ? <TopicSummary topics={plannerData.topics} /> : null}
                   {exam.notes && <p className="text-sm text-muted-foreground">{exam.notes}</p>}
                   <ExamProgressBar progress={exam.progress} />
-                  {plannerData?.study_plan?.length ? (
-                    <p className="text-xs text-primary">{plannerData.study_plan.length}-day AI study plan ready</p>
-                  ) : null}
+                  {plannerData ? <ExamPlannerSummary planner={plannerData} /> : null}
                 </div>
                 <div className="flex lg:flex-col gap-2 shrink-0">
                   <Button variant="outline" size="sm" onClick={() => openEdit(exam)}><Pencil className="h-4 w-4 mr-1" /> Edit</Button>
