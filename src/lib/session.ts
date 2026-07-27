@@ -76,24 +76,41 @@ export function useSessionKeepAlive() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const revalidate = () => {
-      if (document.visibilityState === "visible") void ensureFreshSession();
+    const revalidate = async () => {
+      if (document.visibilityState !== "visible") return;
+      const session = await ensureFreshSession();
+      if (!session) return;
+
+      // Register/refresh this browser in the connected-devices list and honour
+      // a revoke issued from another device.
+      const { touchCurrentDevice } = await import("@/lib/devices");
+      try {
+        const allowed = await touchCurrentDevice();
+        if (!allowed) {
+          await supabase.auth.signOut({ scope: "local" });
+          window.location.assign("/auth");
+        }
+      } catch {
+        /* device tracking is best-effort */
+      }
     };
 
-    revalidate();
-    const interval = window.setInterval(revalidate, 5 * 60 * 1000);
-    document.addEventListener("visibilitychange", revalidate);
-    window.addEventListener("online", revalidate);
-    window.addEventListener("focus", revalidate);
+    void revalidate();
+    const interval = window.setInterval(() => void revalidate(), 5 * 60 * 1000);
+    const onEvent = () => void revalidate();
+    document.addEventListener("visibilitychange", onEvent);
+    window.addEventListener("online", onEvent);
+    window.addEventListener("focus", onEvent);
 
     return () => {
       window.clearInterval(interval);
-      document.removeEventListener("visibilitychange", revalidate);
-      window.removeEventListener("online", revalidate);
-      window.removeEventListener("focus", revalidate);
+      document.removeEventListener("visibilitychange", onEvent);
+      window.removeEventListener("online", onEvent);
+      window.removeEventListener("focus", onEvent);
     };
   }, []);
 }
+
 
 /**
  * Secure sign-out: cancel in-flight requests, drop cached protected data,
