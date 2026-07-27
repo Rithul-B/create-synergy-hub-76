@@ -41,7 +41,7 @@ async function migrateLocalExams(userId: string) {
     priority: exam.priority,
     status: exam.status,
     progress: exam.progress ?? 0,
-    planner_data: (plannerMap[exam.id] as Record<string, unknown>) ?? {},
+    planner_data: (plannerMap[exam.id] ?? {}) as never,
   }));
 
   const { error } = await supabase.from("exams").upsert(rows, { onConflict: "id" });
@@ -112,7 +112,7 @@ export async function updateExam(id: string, input: Partial<ExamInput>): Promise
   if (input.status !== undefined) patch.status = input.status;
   if (input.progress !== undefined) patch.progress = input.progress;
 
-  const { error } = await supabase.from("exams").update(patch).eq("id", id);
+  const { error } = await supabase.from("exams").update(patch as never).eq("id", id);
   if (error) throw new Error(error.message);
 }
 
