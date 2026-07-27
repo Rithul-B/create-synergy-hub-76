@@ -306,6 +306,9 @@ function SettingsPage() {
           </Card>
 
           <SessionCard />
+
+          <DevicesCard />
+
         </>
       )}
     </div>
