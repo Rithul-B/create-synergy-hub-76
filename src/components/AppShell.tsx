@@ -13,7 +13,6 @@ import {
   Settings,
   LogOut,
   GraduationCap,
-  Book,
   MoreHorizontal,
 } from "lucide-react";
 
@@ -25,6 +24,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { APP_NAME } from "@/lib/brand";
 import { NavIcon } from "@/components/NavIcon";
 import { cn } from "@/lib/utils";
+import { BrandMark } from "@/components/BrandMark";
 
 const NAV = [
   { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -69,9 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <aside className="hidden md:flex w-60 flex-col border-r bg-sidebar text-sidebar-foreground">
         <div className="p-5 border-b border-sidebar-border">
           <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground grid place-items-center">
-              <Book className="h-4 w-4" />
-            </div>
+            <BrandMark className="h-8 w-8 rounded-lg" />
 
             <span className="font-display text-xl">{APP_NAME}</span>
           </Link>
@@ -114,9 +112,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b bg-background/95 backdrop-blur px-4 py-3 md:px-6">
           <Link to="/dashboard" className="md:hidden flex items-center gap-2 min-w-0">
-            <div className="h-8 w-8 shrink-0 rounded-lg bg-primary text-primary-foreground grid place-items-center">
-              <Book className="h-4 w-4" />
-            </div>
+            <BrandMark className="h-8 w-8 rounded-lg" />
 
             <span className="font-display text-lg truncate">{APP_NAME}</span>
           </Link>

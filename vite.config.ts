@@ -7,22 +7,13 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { oauthLocalProxyPlugin } from "./vite-plugin-oauth-local-proxy";
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
-const supabasePublishableKey =
-  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  process.env.VITE_SUPABASE_ANON_KEY ||
-  process.env.SUPABASE_PUBLISHABLE_KEY ||
-  process.env.SUPABASE_ANON_KEY ||
-  "";
-
+// NOTE: do NOT define import.meta.env.VITE_SUPABASE_* here. The Lovable vite
+// config injects them from the project's .env at build time; overriding them
+// with process.env values (empty on the build machine) blanks the client
+// credentials and breaks sign in / sign up in preview and production.
 export default defineConfig({
   vite: {
     plugins: [oauthLocalProxyPlugin()],
-    define: {
-      "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseUrl),
-      "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabasePublishableKey),
-      "import.meta.env.VITE_SUPABASE_ANON_KEY": JSON.stringify(supabasePublishableKey),
-    },
   },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
