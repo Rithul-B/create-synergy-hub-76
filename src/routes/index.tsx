@@ -20,6 +20,7 @@ import {
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 import { APP_NAME, APP_TAGLINE, APP_DESCRIPTION } from "@/lib/brand";
+import { BrandMark } from "@/components/BrandMark";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -107,9 +108,7 @@ function Landing() {
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/20 to-background">
       <header className="max-w-6xl mx-auto flex items-center justify-between p-6 gap-4">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="h-9 w-9 shrink-0 rounded-xl bg-primary text-primary-foreground grid place-items-center">
-            <Book className="h-5 w-5" />
-          </div>
+          <BrandMark className="h-9 w-9" />
 
           <span className="font-display text-2xl truncate">{APP_NAME}</span>
         </div>
