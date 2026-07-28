@@ -8,7 +8,6 @@ import {
   GraduationCap,
   CalendarDays,
   BookOpen,
-  Book,
   MessageSquare,
   Target,
   ArrowRight,
