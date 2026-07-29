@@ -145,3 +145,11 @@
 .markdown pre code { background: transparent; padding: 0; }
 .markdown a { color: var(--color-primary); text-decoration: underline; }
 .markdown blockquote { border-left: 3px solid var(--color-border); padding-left: 0.85rem; color: var(--color-muted-foreground); margin: 0.65rem 0; }
+
+/* Brand gradient text */
+.text-gradient-brand {
+  background-image: var(--gradient-brand, linear-gradient(120deg, var(--primary), var(--brand-2) 55%, var(--brand-3)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

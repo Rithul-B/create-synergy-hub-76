@@ -71,7 +71,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/dashboard" className="flex items-center gap-2">
             <BrandMark className="h-8 w-8 rounded-lg" />
 
-            <span className="font-display text-xl">{APP_NAME}</span>
+            <span className="font-display text-xl text-gradient-brand">{APP_NAME}</span>
           </Link>
         </div>
 
@@ -114,7 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/dashboard" className="md:hidden flex items-center gap-2 min-w-0">
             <BrandMark className="h-8 w-8 rounded-lg" />
 
-            <span className="font-display text-lg truncate">{APP_NAME}</span>
+            <span className="font-display text-lg truncate text-gradient-brand">{APP_NAME}</span>
           </Link>
 
           <div className="hidden md:block flex-1" />
