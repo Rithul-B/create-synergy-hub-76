@@ -33,6 +33,14 @@
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent: var(--sidebar-accent);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-brand-2: var(--brand-2);
+  --color-brand-3: var(--brand-3);
   --font-sans: "Century Gothic", "CenturyGothic", "AppleGothic", "Futura", sans-serif;
   --font-display: "Century Gothic", "CenturyGothic", "AppleGothic", "Futura", sans-serif;
 }
