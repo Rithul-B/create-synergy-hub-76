@@ -79,7 +79,9 @@ export const sendChatMessage = createServerFn({ method: "POST" })
         subjectName && images.length > 0 && !data.content.trim()
           ? `You are an expert ${subjectName} tutor. Analyze the attached image(s) in the context of ${subjectName}. If the image is unrelated to ${subjectName}, briefly say so.`
           : null;
-      const system = guidance ? `${scopeOverride ?? base} ${guidance}` : (scopeOverride ?? base);
+      const spelling =
+        "The student may make spelling or typing mistakes. Silently interpret the intended meaning, and when you notice a misspelling, start your reply with a short line like: *Did you mean: \"<corrected question>\"?* before answering.";
+      const system = [scopeOverride ?? base, spelling, guidance].filter(Boolean).join(" ");
 
       // Strip data URLs from historical messages to keep prompt small; keep placeholder.
       const cleaned = (history ?? []).slice(0, -1).map((m) => ({
